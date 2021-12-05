@@ -53,13 +53,13 @@ stepBoard n board = let
                        else Right board'
 
 stepBoards :: Int -> [Board] -> Either Int [Board]
-stepBoards n = mapM (stepBoard n)
+stepBoards = mapM . stepBoard 
 
 runBoards :: [Int] -> [Board] -> Either Int [Board]
 runBoards xs boards = foldM (flip stepBoards) boards xs
 
 runInput :: String -> Int
-runInput = parseInput .> second (map (map (map Just))) .> uncurry runBoards .> fromLeft (-1)
+runInput = parseInput .> second (map.map.map $ Just) .> uncurry runBoards .> fromLeft (-1)
 
 main :: IO ()
 main = do

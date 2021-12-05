@@ -62,7 +62,7 @@ runBoards (x:xs) boards = let
 
 
 runInput :: String -> Int
-runInput = parseInput .> second (map (map (map Just))) .> uncurry runBoards .> fromJust
+runInput = parseInput .> second (map.map.map$Just) .> uncurry runBoards .> fromJust
 
 main :: IO ()
 main = do
