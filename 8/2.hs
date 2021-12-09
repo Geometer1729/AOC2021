@@ -26,18 +26,18 @@ import qualified Data.Set as S
 import Flow
 
 type Line = ([[Int]],[[Int]])
-type Perm = [Maybe Int]
+type Perm = [Int]
+
+(!?) :: [a] -> Int -> Maybe a
+xs !? n = listToMaybe $ drop n xs
 
 cti :: Char -> Int
 cti c = ord c - 97
 
 refine :: Perm -> [Perm]
 refine perm = do
-  x <- Just <$> [0..6]
-  guard $ x `notElem` perm
-  y <- [0..6]
-  guard $ isNothing $ perm !! y
-  return $ [ if i == y then x else p | (i,p) <- zip [0..6] perm ]
+  x <- [0..6]
+  return $ perm ++ [x]
 
 
 nums :: [[Int]]
@@ -49,27 +49,29 @@ validate perm word = any (validateFor perm word) nums
 validateFor :: Perm -> [Int] -> [Int] -> Bool
 validateFor perm word target = length word == length target && and ( do
   i <- [0..6]
-  return $ case perm !! i of
+  return $ case perm !? i of
     Just x -> ( i `elem` word && x `elem` target ) || (i `notElem` word && x `notElem` target)
     Nothing -> True
                                                                )
 
 findPerm :: [[Int]] -> Perm
-findPerm ws = findPerm' ws (replicate 7 Nothing)
+findPerm ws = head $ findPerm' ws []
 
-findPerm' :: [[Int]] -> Perm -> Perm
-findPerm' ws perm = if all isJust perm 
-                          then perm
-                          else head $ do
+findPerm' :: [[Int]] -> Perm -> [Perm]
+findPerm' ws perm = if length perm == 7
+                          then return perm
+                          else do
                             perm' <- refine perm
                             guard $ all (validate perm') ws 
-                            return $ findPerm' ws perm'
+                            findPerm' ws perm'
 
 
 lookupPerm :: Perm -> [Int] -> Int
 lookupPerm perm word = let
-  word' = sort [ x | i <- word , let Just x = perm !! i ]
-    in head [ i | i <- [0..9] , nums !! i == word' ]
+  word' = sort [ x | i <- word , let Just x = perm !? i ]
+    in case [ i | i <- [0..9] , nums !! i == word' ] of
+         [x] -> x
+         _ -> error "word not found"
 
 
 solveLine :: Line -> [Int]
