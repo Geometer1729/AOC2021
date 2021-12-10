@@ -25,6 +25,8 @@ import qualified Data.Set as S
 
 import Flow
 
+import Control.Parallel.Strategies
+
 type Line = ([[Int]],[[Int]])
 type Perm = [Int]
 
@@ -95,5 +97,5 @@ asBase10 = foldl (\a b -> 10*a+b) 0
 main :: IO ()
 main = do
     txt <- readFile "input"
-    let sols = runLine <$> lines txt
+    let sols = parMap rdeepseq runLine (lines txt)
     print $ sum (sols <&> asBase10)
